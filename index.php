@@ -1,10 +1,10 @@
 <?php
 /**
- * CHANGEIT! - Versión Final con Favicon
+ * CHANGEIT! - Versión Final con Historial Activo
  */
 require_once 'config/db.php';
 
-// 1. DICCIONARIO COMPLETO
+// 1. DICCIONARIO COMPLETO (Tu lista de monedas)
 $nombres_monedas = [
     "AED" => "Dirham de Emiratos Árabes", "AFN" => "Afgani Afgano", "ALL" => "Lek Albanés", "AMD" => "Dram Armenio",
     "ANG" => "Florín Antillano", "AOA" => "Kwanza Angoleño", "ARS" => "Peso Argentino", "AUD" => "Dólar Australiano",
@@ -67,6 +67,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $valor_tasa = $tasas[$moneda_destino];
         $calculo = $cantidad_ingresada * $valor_tasa;
         $resultado_final = number_format($calculo, 2);
+
+        // --- AQUÍ ESTÁ EL CAMBIO IMPORTANTE: GUARDAR EN MYSQL ---
+        if (isset($conn) && $conn->ping()) {
+            $stmt = $conn->prepare("INSERT INTO historial (cantidad_origen, moneda_destino, resultado_conversion) VALUES (?, ?, ?)");
+            // 'dsd' significa: Decimal (double), String, Decimal (double)
+            $stmt->bind_param("dsd", $cantidad_ingresada, $moneda_destino, $calculo);
+            $stmt->execute();
+            $stmt->close();
+        }
+        // ---------------------------------------------------------
+
     } else {
         $resultado_final = "Error: Datos inválidos.";
     }
@@ -129,4 +140,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
 </body>
 </html>
-<?php exit; ?>
