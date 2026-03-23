@@ -1,6 +1,6 @@
 # 🔴 ChangeIt! - Conversor de Divisas Global
 
-Este es mi primer proyecto de 1º de DAM. Es un conversor de moneda profesional con temática oscura/Sith, que utiliza una API financiera en tiempo real para ofrecer tasas de cambio de más de 160 países.
+Este es mi primer proyecto de 1º de DAM. Es un conversor de moneda profesional que utiliza una API financiera en tiempo real para ofrecer tasas de cambio de más de 160 países.
 
 ## 🚀 Características
 - **API Real-Time:** Conexión con ExchangeRate-API para obtener precios vivos.
