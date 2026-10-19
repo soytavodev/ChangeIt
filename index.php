@@ -2,7 +2,17 @@
 /**
  * CHANGEIT! - Versión Final con Historial Activo
  */
-require_once 'config/db.php';
+// El historial en MySQL es opcional: si no hay base de datos configurada
+// o no se puede conectar, el conversor sigue funcionando sin guardar nada.
+$conn = null;
+if (file_exists(__DIR__ . '/config/db.php')) {
+    try {
+        require_once __DIR__ . '/config/db.php';
+    } catch (mysqli_sql_exception $e) {
+        error_log('ChangeIt: sin conexión a la base de datos: ' . $e->getMessage());
+        $conn = null;
+    }
+}
 
 // 1. DICCIONARIO COMPLETO (Tu lista de monedas)
 $nombres_monedas = [
@@ -69,12 +79,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $resultado_final = number_format($calculo, 2);
 
         // --- AQUÍ ESTÁ EL CAMBIO IMPORTANTE: GUARDAR EN MYSQL ---
-        if (isset($conn) && $conn->ping()) {
-            $stmt = $conn->prepare("INSERT INTO historial (cantidad_origen, moneda_destino, resultado_conversion) VALUES (?, ?, ?)");
-            // 'dsd' significa: Decimal (double), String, Decimal (double)
-            $stmt->bind_param("dsd", $cantidad_ingresada, $moneda_destino, $calculo);
-            $stmt->execute();
-            $stmt->close();
+        if ($conn instanceof mysqli) {
+            try {
+                $stmt = $conn->prepare("INSERT INTO historial (cantidad_origen, moneda_destino, resultado_conversion) VALUES (?, ?, ?)");
+                // 'dsd' significa: Decimal (double), String, Decimal (double)
+                $stmt->bind_param("dsd", $cantidad_ingresada, $moneda_destino, $calculo);
+                $stmt->execute();
+                $stmt->close();
+            } catch (mysqli_sql_exception $e) {
+                error_log('ChangeIt: no se pudo guardar el historial: ' . $e->getMessage());
+            }
         }
         // ---------------------------------------------------------
 
